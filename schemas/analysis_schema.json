@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TrustLayer Analysis Result",
+  "description": "Shared schema for TrustLayer multimodal content verification",
+  "type": "object",
+  "required": [
+    "file_id",
+    "filename",
+    "modality",
+    "score",
+    "evidence",
+    "claims",
+    "sources",
+    "provenance",
+    "conflicts",
+    "verdict"
+  ],
+  "properties": {
+    "file_id": {
+      "type": "string"
+    },
+
+    "filename": {
+      "type": "string"
+    },
+
+    "modality": {
+      "type": "string",
+      "enum": [
+        "image",
+        "text",
+        "document",
+        "audio"
+      ]
+    },
+
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "description"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim_id",
+          "text"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "who": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "what": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "when": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "where": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "url"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "supported",
+              "contradicted",
+              "no_information"
+            ]
+          }
+        }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "exif_present": {
+          "type": "boolean"
+        },
+        "c2pa_present": {
+          "type": "boolean"
+        },
+        "metadata_removed": {
+          "type": "boolean"
+        },
+        "metadata_details": {
+          "type": "object"
+        }
+      }
+    },
+
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim_a",
+          "claim_b",
+          "description"
+        ],
+        "properties": {
+          "claim_a": {
+            "type": "string"
+          },
+          "claim_b": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        }
+      }
+    },
+
+    "verdict": {
+      "type": "object",
+      "required": [
+        "label",
+        "confidence"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "Authentic",
+            "Manipulated",
+            "Coordinated fake",
+            "Not enough evidence"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
