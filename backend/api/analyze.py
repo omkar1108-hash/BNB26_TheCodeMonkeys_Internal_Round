@@ -7,6 +7,7 @@ from backend.claims.extractor import extract_claims
 from backend.claims.conflict import find_conflicts
 from backend.claims.evidence_graph import build_evidence_graph
 from backend.verdict.engine import generate_verdict
+from backend.config import UPLOADS_DIR
 
 
 router = APIRouter(
@@ -95,7 +96,7 @@ async def analyze_files(file_ids: list[str]):
             detail="No file IDs provided"
         )
 
-    upload_dir = Path("data/uploads")
+    upload_dir = UPLOADS_DIR
 
     if not upload_dir.exists():
         raise HTTPException(

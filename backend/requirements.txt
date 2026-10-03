@@ -1,21 +1,29 @@
-annotated-doc==0.0.5
-annotated-types==0.8.0
-anyio==4.15.1
-click==8.5.0
-ExifRead==3.5.1
-fastapi==0.142.2
-h11==0.16.0
-idna==3.20
-lxml==6.1.3
-opentelemetry-api==1.45.0
-pillow==12.3.0
-pydantic==2.13.5
-pydantic_core==2.46.5
-pypdf==6.19.0
-python-docx==1.2.0
-python-dotenv==1.2.4
-python-multipart==0.0.32
-starlette==1.7.0
-typing-inspection==0.4.4
-typing_extensions==4.16.0
-uvicorn==0.54.0
+# Core Backend & API
+fastapi>=0.141.0
+uvicorn>=0.52.0
+pydantic>=2.13.0
+python-multipart>=0.0.30
+python-dotenv>=1.2.0
+
+# Document & Metadata Parsing
+pypdf>=6.18.0
+python-docx>=1.2.0
+pillow>=12.0.0
+ExifRead>=3.5.0
+
+# HTTP & LLM Client (Ollama local interface)
+httpx>=0.28.0
+requests>=2.34.0
+
+# Fusion, ML & Analytics
+numpy>=2.0.0
+scipy>=1.15.0
+scikit-learn>=1.6.0
+xgboost>=3.0.0
+
+# Frontend
+streamlit>=1.60.0
+
+# Deep Learning (CPU-first with auto CUDA detection)
+torch>=2.0.0
+transformers>=4.40.0

@@ -4,12 +4,10 @@ import uuid
 import shutil
 
 from backend.analyzers.file_detector import detect_file_type
+from backend.config import UPLOADS_DIR as UPLOAD_DIR
 
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
-
-UPLOAD_DIR = Path("data/uploads")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("/")
