@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustLayer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app-container" class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🛡️</span>
+        <div class="brand-text">
+          <h1 id="app-title" class="app-title">TrustLayer</h1>
+          <p id="app-subtitle" class="app-subtitle">Multimodal Digital Content Verification</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- State: Empty (No selection analyzed yet) -->
+    <section id="state-empty" class="state-card card" style="display: none;">
+      <p id="empty-message" class="state-text"></p>
+    </section>
+
+    <!-- State: Analyzing in progress -->
+    <section id="state-analyzing" class="state-card card" style="display: none;">
+      <div class="spinner"></div>
+      <p id="analyzing-message" class="state-text"></p>
+    </section>
+
+    <!-- State: Error / Backend unreachable -->
+    <section id="state-error" class="state-card card" style="display: none;">
+      <p id="error-message" class="state-text"></p>
+    </section>
+
+    <!-- State: Result -->
+    <main id="state-result" class="result-container" style="display: none;">
+      <!-- Headline & Verdict Card -->
+      <section class="verdict-card card">
+        <div class="verdict-header">
+          <span id="verdict-emoji" class="verdict-emoji"></span>
+          <h2 id="verdict-headline" class="verdict-headline"></h2>
+        </div>
+        <div class="verdict-badges">
+          <span id="confidence-badge" class="badge main-accent"></span>
+          <span id="abstained-badge" class="badge main-accent" style="display: none;"></span>
+        </div>
+      </section>
+
+      <!-- Evaluated Snippet preview -->
+      <section id="snippet-card" class="snippet-card card" style="display: none;">
+        <h3 id="snippet-heading" class="section-title"></h3>
+        <p id="snippet-text" class="snippet-text"></p>
+      </section>
+
+      <!-- How we got here -->
+      <section class="findings-card card">
+        <h3 id="how-we-got-here-heading" class="section-title"></h3>
+        <ul id="how-we-got-here-list" class="findings-list"></ul>
+      </section>
+
+      <!-- Risky to trust -->
+      <section class="risky-card card">
+        <h3 id="risky-heading" class="section-title risky-title"></h3>
+        <ul id="risky-list" class="findings-list"></ul>
+      </section>
+
+      <!-- What looks fine -->
+      <section class="fine-card card">
+        <h3 id="fine-heading" class="section-title fine-title"></h3>
+        <ul id="fine-list" class="findings-list"></ul>
+      </section>
+
+      <!-- Full report button -->
+      <footer class="actions">
+        <button id="btn-full-report" class="btn-primary" type="button"></button>
+      </footer>
+    </main>
+  </div>
+
+  <script src="popup-copy.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

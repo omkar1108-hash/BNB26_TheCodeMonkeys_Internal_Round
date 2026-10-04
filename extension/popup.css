@@ -1,0 +1,283 @@
+/* TrustLayer Extension Stylesheet
+   Strict adherence to color palette:
+   - Popup background: #FFF9D6
+   - Cards: #FFDCDC
+   - Main button & accents: #D8A2A2 with text #1F1F1F
+   - "What looks fine" accents: #8EA66B with text #1F1F1F
+   - Body text: #2B2B2B
+   - Width 360px, rounded 14px corners, no heavy shadows, no white text.
+*/
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 360px;
+  min-height: 200px;
+  max-height: 580px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #FFF9D6;
+  color: #2B2B2B;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 14px;
+}
+
+/* Custom scrollbar matching palette */
+body::-webkit-scrollbar {
+  width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #FFF9D6;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #D8A2A2;
+  border-radius: 14px;
+}
+
+/* Container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 4px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1F1F1F;
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+}
+
+.app-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: #2B2B2B;
+  line-height: 1.15;
+}
+
+/* Base Card Style */
+.card {
+  background-color: #FFDCDC;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(31, 31, 31, 0.08);
+  box-shadow: none;
+}
+
+/* State Cards (Empty, Analyzing, Error) */
+.state-card {
+  text-align: center;
+  padding: 20px 16px;
+}
+
+.state-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2B2B2B;
+  line-height: 1.5;
+}
+
+/* Spinner */
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(31, 31, 31, 0.15);
+  border-top-color: #D8A2A2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 10px auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Result Container */
+.result-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Verdict Card */
+.verdict-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 14px;
+}
+
+.verdict-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.verdict-emoji {
+  font-size: 42px;
+  line-height: 1;
+}
+
+.verdict-headline {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1F1F1F;
+  letter-spacing: -0.3px;
+}
+
+.verdict-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+/* Badges & Accents */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.main-accent {
+  background-color: #D8A2A2;
+  color: #1F1F1F;
+}
+
+.fine-accent {
+  background-color: #8EA66B;
+  color: #1F1F1F;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1F1F1F;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.risky-title {
+  color: #1F1F1F;
+}
+
+.fine-title {
+  color: #1F1F1F;
+}
+
+/* Fine card accent styling */
+.fine-card {
+  border-left: 5px solid #8EA66B;
+}
+
+.risky-card {
+  border-left: 5px solid #D8A2A2;
+}
+
+/* Snippet Preview */
+.snippet-card {
+  padding: 10px 12px;
+}
+
+.snippet-text {
+  font-size: 11px;
+  color: #2B2B2B;
+  font-style: italic;
+  max-height: 48px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Findings and Lists */
+.findings-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.findings-list li {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #2B2B2B;
+  word-break: break-word;
+}
+
+/* Action Button */
+.actions {
+  margin-top: 4px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 11px 16px;
+  background-color: #D8A2A2;
+  color: #1F1F1F;
+  border: 1px solid rgba(31, 31, 31, 0.1);
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: none;
+  transition: opacity 0.15s ease, transform 0.05s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary:hover {
+  opacity: 0.92;
+}
+
+.btn-primary:active {
+  transform: scale(0.99);
+}
