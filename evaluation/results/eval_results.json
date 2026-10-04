@@ -1,0 +1,394 @@
+{
+  "loto": {
+    "per_technique": {
+      "image_noise_patch": {
+        "label": "manipulated",
+        "family": "image",
+        "seen": {
+          "n": 15,
+          "correct": 0.733,
+          "abstained": 0.267,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 0.733,
+          "abstained": 0.267,
+          "wrong_confident": 0.0
+        }
+      },
+      "image_double_jpeg": {
+        "label": "manipulated",
+        "family": "image",
+        "seen": {
+          "n": 15,
+          "correct": 0.6,
+          "abstained": 0.4,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 0.6,
+          "abstained": 0.4,
+          "wrong_confident": 0.0
+        }
+      },
+      "image_blur_patch": {
+        "label": "manipulated",
+        "family": "image",
+        "seen": {
+          "n": 15,
+          "correct": 0.467,
+          "abstained": 0.467,
+          "wrong_confident": 0.067
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 0.4,
+          "abstained": 0.4,
+          "wrong_confident": 0.2
+        }
+      },
+      "audio_vocoder_noise": {
+        "label": "manipulated",
+        "family": "audio",
+        "seen": {
+          "n": 15,
+          "correct": 0.667,
+          "abstained": 0.333,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 0.667,
+          "abstained": 0.333,
+          "wrong_confident": 0.0
+        }
+      },
+      "audio_bandlimit": {
+        "label": "manipulated",
+        "family": "audio",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "audio_splice": {
+        "label": "manipulated",
+        "family": "audio",
+        "seen": {
+          "n": 15,
+          "correct": 0.467,
+          "abstained": 0.267,
+          "wrong_confident": 0.267
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 0.333,
+          "abstained": 0.067,
+          "wrong_confident": 0.6
+        }
+      },
+      "metadata_editor_tag": {
+        "label": "manipulated",
+        "family": "metadata",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "metadata_ai_tag": {
+        "label": "manipulated",
+        "family": "metadata",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "metadata_timestamp_gap": {
+        "label": "manipulated",
+        "family": "metadata",
+        "seen": {
+          "n": 15,
+          "correct": 0.733,
+          "abstained": 0.267,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 0.0,
+          "abstained": 0.067,
+          "wrong_confident": 0.933
+        }
+      },
+      "coord_date_shift": {
+        "label": "coordinated_synthetic",
+        "family": "cross_modal",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "coord_location_swap": {
+        "label": "coordinated_synthetic",
+        "family": "cross_modal",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "coord_speaker_swap": {
+        "label": "coordinated_synthetic",
+        "family": "cross_modal",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "coord_cross_doc_date": {
+        "label": "coordinated_synthetic",
+        "family": "cross_modal",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "coord_cross_doc_location": {
+        "label": "coordinated_synthetic",
+        "family": "cross_modal",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      },
+      "coord_date_and_location": {
+        "label": "coordinated_synthetic",
+        "family": "cross_modal",
+        "seen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        },
+        "unseen": {
+          "n": 15,
+          "correct": 1.0,
+          "abstained": 0.0,
+          "wrong_confident": 0.0
+        }
+      }
+    },
+    "pooled_unseen": {
+      "n": 330,
+      "accuracy": 0.8273,
+      "macro_f1": 0.8145,
+      "auroc_ovr": 0.9772,
+      "ece": 0.1468,
+      "authentic_false_alarm_rate": 0.0,
+      "coverage_vs_accuracy": [
+        {
+          "threshold": 0.4,
+          "coverage": 1.0,
+          "selective_accuracy": 0.827
+        },
+        {
+          "threshold": 0.5,
+          "coverage": 1.0,
+          "selective_accuracy": 0.827
+        },
+        {
+          "threshold": 0.6,
+          "coverage": 0.982,
+          "selective_accuracy": 0.843
+        },
+        {
+          "threshold": 0.7,
+          "coverage": 0.976,
+          "selective_accuracy": 0.845
+        },
+        {
+          "threshold": 0.8,
+          "coverage": 0.961,
+          "selective_accuracy": 0.849
+        },
+        {
+          "threshold": 0.9,
+          "coverage": 0.93,
+          "selective_accuracy": 0.853
+        }
+      ],
+      "per_class_recall": {
+        "authentic": 0.822,
+        "manipulated": 0.637,
+        "coordinated_synthetic": 1.0,
+        "insufficient_evidence": 1.0
+      }
+    }
+  },
+  "lofo": {
+    "image": {
+      "n": 45,
+      "correct": 0.378,
+      "abstained": 0.289,
+      "wrong_confident": 0.333
+    },
+    "audio": {
+      "n": 45,
+      "correct": 0.022,
+      "abstained": 0.178,
+      "wrong_confident": 0.8
+    },
+    "metadata": {
+      "n": 45,
+      "correct": 0.0,
+      "abstained": 0.111,
+      "wrong_confident": 0.889
+    }
+  },
+  "ablation": {
+    "image only": {
+      "seen_macro_f1": 0.303,
+      "seen_coordinated_recall": 0.1,
+      "loto_macro_f1": 0.299,
+      "loto_coordinated_recall": 0.1
+    },
+    "audio only": {
+      "seen_macro_f1": 0.294,
+      "seen_coordinated_recall": 0.833,
+      "loto_macro_f1": 0.248,
+      "loto_coordinated_recall": 0.833
+    },
+    "text only": {
+      "seen_macro_f1": 0.42,
+      "seen_coordinated_recall": 0.122,
+      "loto_macro_f1": 0.416,
+      "loto_coordinated_recall": 0.111
+    },
+    "metadata only": {
+      "seen_macro_f1": 0.423,
+      "seen_coordinated_recall": 0.556,
+      "loto_macro_f1": 0.277,
+      "loto_coordinated_recall": 0.056
+    },
+    "all detectors (no cross-modal)": {
+      "seen_macro_f1": 0.749,
+      "seen_coordinated_recall": 0.6,
+      "loto_macro_f1": 0.614,
+      "loto_coordinated_recall": 0.378
+    },
+    "detectors + cross-modal, no aggregate features": {
+      "seen_macro_f1": 0.95,
+      "seen_coordinated_recall": 1.0,
+      "loto_macro_f1": 0.83,
+      "loto_coordinated_recall": 0.833
+    },
+    "detectors + cross-modal + aggregates (full)": {
+      "seen_macro_f1": 0.96,
+      "seen_coordinated_recall": 1.0,
+      "loto_macro_f1": 0.896,
+      "loto_coordinated_recall": 1.0
+    }
+  },
+  "robustness": {
+    "none": {
+      "accuracy_on_image_bundles": 0.764,
+      "image_manipulation_recall": 0.6,
+      "image_manipulation_abstained": 0.378,
+      "authentic_accepted": 0.68,
+      "authentic_abstained": 0.32,
+      "authentic_falsely_accused": 0.0,
+      "n": 165
+    },
+    "jpeg_q50": {
+      "accuracy_on_image_bundles": 0.57,
+      "image_manipulation_recall": 0.111,
+      "image_manipulation_abstained": 0.844,
+      "authentic_accepted": 0.28,
+      "authentic_abstained": 0.64,
+      "authentic_falsely_accused": 0.08,
+      "n": 165
+    },
+    "resize_half": {
+      "accuracy_on_image_bundles": 0.709,
+      "image_manipulation_recall": 0.4,
+      "image_manipulation_abstained": 0.444,
+      "authentic_accepted": 0.68,
+      "authentic_abstained": 0.28,
+      "authentic_falsely_accused": 0.04,
+      "n": 165
+    },
+    "screenshot_like": {
+      "accuracy_on_image_bundles": 0.57,
+      "image_manipulation_recall": 0.111,
+      "image_manipulation_abstained": 0.822,
+      "authentic_accepted": 0.28,
+      "authentic_abstained": 0.72,
+      "authentic_falsely_accused": 0.0,
+      "n": 165
+    }
+  }
+}

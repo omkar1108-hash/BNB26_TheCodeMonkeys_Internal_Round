@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TrustLayer Bundle Analysis Result",
+  "description": "Schema for multimodal bundle verification, calibrated probabilities, and evidence ranking",
+  "type": "object",
+  "required": [
+    "bundle_id",
+    "verdict",
+    "modality_results",
+    "ranked_evidence"
+  ],
+  "properties": {
+    "bundle_id": {
+      "type": "string"
+    },
+    "verdict": {
+      "type": "object",
+      "required": [
+        "label",
+        "confidence"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "authentic",
+            "manipulated",
+            "coordinated_synthetic",
+            "insufficient_evidence",
+            "Authentic",
+            "Manipulated",
+            "Coordinated fake",
+            "Not enough evidence"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "probabilities": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "abstained": {
+          "type": "boolean"
+        },
+        "abstain_reason": {
+          "type": ["string", "null"]
+        },
+        "report": {
+          "type": "string"
+        },
+        "report_verified": {
+          "type": "boolean"
+        },
+        "is_fallback": {
+          "type": "boolean"
+        }
+      }
+    },
+    "modality_results": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "modality": { "type": "string" },
+          "present": { "type": "boolean" },
+          "score": { "type": "number" },
+          "evidence": { "type": "string" },
+          "features": { "type": "object" },
+          "is_fallback": { "type": "boolean" }
+        }
+      }
+    },
+    "cross_modal_results": {
+      "type": ["object", "null"],
+      "properties": {
+        "image_text_similarity": { "type": ["number", "null"] },
+        "speaker_similarity": { "type": ["number", "null"] },
+        "metadata_conflicts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "contradictions": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "is_fallback": { "type": "boolean" }
+      }
+    },
+    "ranked_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "rank",
+          "category",
+          "description"
+        ],
+        "properties": {
+          "rank": { "type": "integer" },
+          "category": { "type": "string" },
+          "modality": { "type": ["string", "null"] },
+          "description": { "type": "string" },
+          "importance": { "type": "number" },
+          "is_fallback": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

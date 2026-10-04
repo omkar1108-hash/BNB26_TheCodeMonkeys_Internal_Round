@@ -1,0 +1,247 @@
+{
+  "task": "image",
+  "name": "own_clean",
+  "run": {
+    "timestamp": "2026-10-04T02:33:16+00:00",
+    "seed": 0,
+    "threshold": 0.5,
+    "calib_frac": 0.0,
+    "limit_per_class": 100,
+    "perturbations": [
+      "none",
+      "jpeg70"
+    ],
+    "learned_on": true
+  },
+  "dataset": {
+    "n_real": 60,
+    "n_fake": 60,
+    "groups": {
+      "jpg": 23,
+      "png": 37
+    },
+    "root": "data\\datasets\\own"
+  },
+  "models": {
+    "image_deepfake": {
+      "model_id": "Ateeqq/ai-vs-human-image-detector",
+      "what": "AI-generated vs. human image classifier",
+      "cached": true,
+      "loaded": true,
+      "last_error": null
+    }
+  },
+  "warnings": [
+    "Check each model card for its training data and avoid evaluating on the same dataset: overlap inflates every number here.",
+    "Small sample (60 real / 60 fake): confidence intervals are wide; do not quote a single number.",
+    "Accuracy/FPR/FNR use a fixed threshold, not one tuned on this data. Threshold-free metrics (AUROC, EER) do not depend on it."
+  ],
+  "results": {
+    "conditions": {
+      "none": {
+        "heuristic": {
+          "n_failed_or_unavailable": 0,
+          "n": 120,
+          "n_real": 60,
+          "n_fake": 60,
+          "auroc": 0.3363888888888889,
+          "auroc_ci95": [
+            0.23802777777777778,
+            0.43434027777777773
+          ],
+          "average_precision": 0.4739353928730132,
+          "eer": 0.65,
+          "tpr_at_1pct_fpr": 0.016666666666666666,
+          "tpr_at_5pct_fpr": 0.18333333333333332,
+          "at_fixed_threshold": {
+            "threshold": 0.5,
+            "accuracy": 0.5666666666666667,
+            "balanced_accuracy": 0.5666666666666667,
+            "tpr": 0.18333333333333332,
+            "fpr": 0.05,
+            "precision": 0.7857142857142857,
+            "tp": 11,
+            "fp": 3,
+            "tn": 57,
+            "fn": 49
+          }
+        },
+        "learned": {
+          "n_failed_or_unavailable": 0,
+          "n": 120,
+          "n_real": 60,
+          "n_fake": 60,
+          "auroc": 0.8966666666666666,
+          "auroc_ci95": [
+            0.8281597222222222,
+            0.9557708333333332
+          ],
+          "average_precision": 0.9168820327837813,
+          "eer": 0.17500000000000002,
+          "tpr_at_1pct_fpr": 0.35,
+          "tpr_at_5pct_fpr": 0.7333333333333333,
+          "at_fixed_threshold": {
+            "threshold": 0.5,
+            "accuracy": 0.8,
+            "balanced_accuracy": 0.8,
+            "tpr": 0.8833333333333333,
+            "fpr": 0.2833333333333333,
+            "precision": 0.7571428571428571,
+            "tp": 53,
+            "fp": 17,
+            "tn": 43,
+            "fn": 7
+          }
+        },
+        "combined": {
+          "n_failed_or_unavailable": 0,
+          "n": 120,
+          "n_real": 60,
+          "n_fake": 60,
+          "auroc": 0.8911111111111111,
+          "auroc_ci95": [
+            0.8148402777777778,
+            0.9541944444444445
+          ],
+          "average_precision": 0.9167210058754395,
+          "eer": 0.17500000000000002,
+          "tpr_at_1pct_fpr": 0.36666666666666664,
+          "tpr_at_5pct_fpr": 0.7333333333333333,
+          "at_fixed_threshold": {
+            "threshold": 0.5,
+            "accuracy": 0.7916666666666666,
+            "balanced_accuracy": 0.7916666666666666,
+            "tpr": 0.8833333333333333,
+            "fpr": 0.3,
+            "precision": 0.7464788732394366,
+            "tp": 53,
+            "fp": 18,
+            "tn": 42,
+            "fn": 7
+          }
+        }
+      },
+      "jpeg70": {
+        "heuristic": {
+          "n_failed_or_unavailable": 0,
+          "n": 120,
+          "n_real": 60,
+          "n_fake": 60,
+          "auroc": 0.2752777777777778,
+          "auroc_ci95": [
+            0.19121527777777778,
+            0.3786111111111111
+          ],
+          "average_precision": 0.4165136603886476,
+          "eer": 0.6833333333333333,
+          "tpr_at_1pct_fpr": 0.0,
+          "tpr_at_5pct_fpr": 0.1,
+          "at_fixed_threshold": {
+            "threshold": 0.5,
+            "accuracy": 0.525,
+            "balanced_accuracy": 0.525,
+            "tpr": 0.08333333333333333,
+            "fpr": 0.03333333333333333,
+            "precision": 0.7142857142857143,
+            "tp": 5,
+            "fp": 2,
+            "tn": 58,
+            "fn": 55
+          }
+        },
+        "learned": {
+          "n_failed_or_unavailable": 0,
+          "n": 120,
+          "n_real": 60,
+          "n_fake": 60,
+          "auroc": 0.8925,
+          "auroc_ci95": [
+            0.8252777777777778,
+            0.9505694444444445
+          ],
+          "average_precision": 0.9121444810555916,
+          "eer": 0.16666666666666663,
+          "tpr_at_1pct_fpr": 0.35,
+          "tpr_at_5pct_fpr": 0.7,
+          "at_fixed_threshold": {
+            "threshold": 0.5,
+            "accuracy": 0.7833333333333333,
+            "balanced_accuracy": 0.7833333333333333,
+            "tpr": 0.8666666666666667,
+            "fpr": 0.3,
+            "precision": 0.7428571428571429,
+            "tp": 52,
+            "fp": 18,
+            "tn": 42,
+            "fn": 8
+          }
+        },
+        "combined": {
+          "n_failed_or_unavailable": 0,
+          "n": 120,
+          "n_real": 60,
+          "n_fake": 60,
+          "auroc": 0.8698611111111111,
+          "auroc_ci95": [
+            0.7862881944444444,
+            0.9375138888888889
+          ],
+          "average_precision": 0.9032506430002788,
+          "eer": 0.16666666666666663,
+          "tpr_at_1pct_fpr": 0.35,
+          "tpr_at_5pct_fpr": 0.7,
+          "at_fixed_threshold": {
+            "threshold": 0.5,
+            "accuracy": 0.8,
+            "balanced_accuracy": 0.8,
+            "tpr": 0.8666666666666667,
+            "fpr": 0.26666666666666666,
+            "precision": 0.7647058823529411,
+            "tp": 52,
+            "fp": 16,
+            "tn": 44,
+            "fn": 8
+          }
+        }
+      }
+    },
+    "groups": {
+      "heuristic": {
+        "jpg": {
+          "n_fake": 23,
+          "detection_rate_at_threshold": 0.17391304347826086,
+          "auroc_vs_reals": 0.3753623188405797
+        },
+        "png": {
+          "n_fake": 37,
+          "detection_rate_at_threshold": 0.1891891891891892,
+          "auroc_vs_reals": 0.31216216216216214
+        }
+      },
+      "learned": {
+        "jpg": {
+          "n_fake": 23,
+          "detection_rate_at_threshold": 0.8695652173913043,
+          "auroc_vs_reals": 0.8710144927536232
+        },
+        "png": {
+          "n_fake": 37,
+          "detection_rate_at_threshold": 0.8918918918918919,
+          "auroc_vs_reals": 0.9126126126126126
+        }
+      },
+      "combined": {
+        "jpg": {
+          "n_fake": 23,
+          "detection_rate_at_threshold": 0.8695652173913043,
+          "auroc_vs_reals": 0.855072463768116
+        },
+        "png": {
+          "n_fake": 37,
+          "detection_rate_at_threshold": 0.8918918918918919,
+          "auroc_vs_reals": 0.9135135135135135
+        }
+      }
+    }
+  }
+}

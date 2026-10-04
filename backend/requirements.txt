@@ -1,0 +1,35 @@
+# Core Backend & API
+fastapi>=0.141.0
+uvicorn>=0.52.0
+pydantic>=2.13.0
+python-multipart>=0.0.30
+python-dotenv>=1.2.0
+
+# Document & Metadata Parsing
+pypdf>=6.18.0
+python-docx>=1.2.0
+pillow>=12.0.0
+ExifRead>=3.5.0
+
+# HTTP & LLM Client (Ollama local interface)
+httpx>=0.28.0
+requests>=2.34.0
+
+# Fusion, ML & Analytics
+numpy>=2.0.0
+scipy>=1.15.0
+scikit-learn>=1.6.0
+xgboost>=3.0.0
+pandas>=2.2.0
+
+# Frontend
+streamlit>=1.60.0
+
+# Deep Learning (CPU-first with auto CUDA detection)
+torch>=2.0.0
+transformers>=4.40.0
+huggingface_hub>=0.24.0
+soundfile>=0.12.0        # decode FLAC/MP3 for dataset evaluation
+
+# Testing
+pytest>=8.0.0

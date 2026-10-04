@@ -1,0 +1,26 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Datasets
+data/datasets/
+
+# Environment
+.env
+
+# Uploaded files
+data/uploads/
+
+# Cache and logs
+data/cache/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
