@@ -118,3 +118,23 @@ def test_api_accepts_multiple_documents():
     body = r.json()
     assert body["label"] == "coordinated_synthetic"
     assert body["model_info"]["type"] == "xgboost"
+
+
+def test_api_response_matches_schema():
+    import json
+    from pathlib import Path
+    from jsonschema import validate
+    from fastapi.testclient import TestClient
+    from backend.main import app
+
+    schema_path = Path(__file__).resolve().parent.parent / "schemas" / "analysis_schema.json"
+    schema = json.loads(schema_path.read_text())
+
+    c = TestClient(app)
+    r = c.post("/api/bundle/analyze", json={
+        "text": "TechFest was held in Mumbai on 15 September 2026.",
+        "documents": {"doc1": "TechFest took place in Mumbai on 15 September 2026."}
+    })
+    assert r.status_code == 200
+    validate(instance=r.json(), schema=schema)
+

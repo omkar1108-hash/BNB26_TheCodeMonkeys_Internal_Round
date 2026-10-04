@@ -20,6 +20,45 @@ class Decision:
     model_info: Dict[str, object] = field(default_factory=dict)
 
 
+TRAINING_CLUSTERS = [
+    # [image, audio, text, metadata, conflicts]
+    {"image": 0.10, "audio": 0.15, "text": 0.15, "metadata": 0.10, "conflicts": 0.0},   # authentic
+    {"image": 0.75, "audio": 0.15, "text": 0.15, "metadata": 0.10, "conflicts": 0.0},   # image manip
+    {"image": 0.10, "audio": 0.70, "text": 0.15, "metadata": 0.10, "conflicts": 0.0},   # audio manip
+    {"image": 0.10, "audio": 0.15, "text": 0.70, "metadata": 0.10, "conflicts": 0.0},   # text manip
+    {"image": 0.10, "audio": 0.15, "text": 0.15, "metadata": 0.65, "conflicts": 0.0},   # metadata manip
+    {"image": 0.10, "audio": 0.15, "text": 0.15, "metadata": 0.10, "conflicts": 2.0},   # coordinated
+    {"image": 0.70, "audio": 0.70, "text": 0.15, "metadata": 0.10, "conflicts": 0.0},   # multi-manip
+    {"image": 0.70, "audio": 0.15, "text": 0.15, "metadata": 0.65, "conflicts": 0.0},   # image + meta manip
+]
+OOD_DISTANCE_THRESHOLD = 0.58
+
+
+def ood_guard(fv: np.ndarray) -> Optional[str]:
+    """
+    Out-of-distribution detector: if a bundle's detector profile is far from ALL
+    known training clusters across available modalities and conflicts, abstain
+    (insufficient_evidence) rather than guessing.
+    """
+    g = lambda n: float(fv[FEATURE_INDEX[n]])
+    present = [m for m in ("image", "audio", "text", "metadata") if g("has_" + m) > 0]
+    if len(present) < 2:
+        return None  # handled by standard insufficient evidence check
+    
+    total_conflicts = min(g("total_conflicts"), 2.0)
+    dists = []
+    for cl in TRAINING_CLUSTERS:
+        diffs = [(g(m + "_score") - cl[m]) ** 2 for m in present]
+        diffs.append(((total_conflicts - cl["conflicts"]) / 2.0) ** 2)
+        dists.append(float(np.sqrt(np.mean(diffs))))
+    
+    min_dist = min(dists)
+    if min_dist > OOD_DISTANCE_THRESHOLD:
+        return (f"Out-of-distribution detector profile (distance {min_dist:.2f} > {OOD_DISTANCE_THRESHOLD}): "
+                "signature does not match any known authentic or manipulation pattern.")
+    return None
+
+
 def reliability_guard(fv: np.ndarray, label: str) -> Optional[str]:
     """
     Evidence-bar policy (applied after the model): never accuse on a single weak or fragile signal.
@@ -63,6 +102,10 @@ def decide(feature_vector: np.ndarray) -> Decision:
         guard = reliability_guard(feature_vector, label)
         if guard:
             abstained, reason, label = True, guard, "insufficient_evidence"
+        else:
+            ood_reason = ood_guard(feature_vector)
+            if ood_reason:
+                abstained, reason, label = True, ood_reason, "insufficient_evidence"
     info = dict(classifier.info())
     info.update({
         "temperature": float(cal.get("temperature", 1.2)),

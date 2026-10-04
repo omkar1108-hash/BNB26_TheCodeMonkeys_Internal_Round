@@ -64,9 +64,9 @@ def extract_audio_spectral_features(file_path: str) -> Dict[str, float]:
 
 def spectral_discontinuity(file_path: str) -> float:
     """
-    Splice indicator. Cuts a recording together from different sources produce an abrupt
-    jump in short-time spectral centroid. Returns the largest frame-to-frame jump as a
-    robust z-score (median/MAD) over 32 ms frames.
+    Multi-scale spectral discontinuity detector across 16ms, 32ms, and 64ms windows.
+    Detects abrupt edits/splices in speech by computing robust z-scores over
+    spectral centroid shifts and spectral flux.
     """
     with wave.open(file_path, "rb") as wf:
         sr = wf.getframerate()
@@ -77,24 +77,45 @@ def spectral_discontinuity(file_path: str) -> float:
     audio = np.frombuffer(raw, dtype=dtype).astype(np.float32)
     if ch > 1:
         audio = audio[::ch]
-    frame = int(0.032 * sr)
-    n = len(audio) // frame
-    if n < 8:
-        return 0.0
-    centroids = []
-    freqs = np.fft.rfftfreq(frame, 1.0 / sr)
-    window = np.hanning(frame)
-    for i in range(n):
-        seg = audio[i * frame:(i + 1) * frame] * window
-        mag = np.abs(np.fft.rfft(seg)) + 1e-9
-        centroids.append(float(np.sum(freqs * mag) / np.sum(mag)))
-    c = np.array(centroids)
-    # smooth over 3 frames so single noisy frames are not treated as cuts
-    c = np.convolve(c, np.ones(3) / 3, mode="valid")
-    d = np.abs(np.diff(c))
-    med = float(np.median(d))
-    mad = float(np.median(np.abs(d - med))) * 1.4826 + 1e-3 * (float(np.median(c)) + 1.0)
-    return float(np.max((d - med) / mad))
+
+    scales_ms = [16, 32, 64]
+    max_z = 0.0
+    for scale in scales_ms:
+        frame = int(scale / 1000.0 * sr)
+        n = len(audio) // frame
+        if n < 8:
+            continue
+        centroids = []
+        fluxes = []
+        freqs = np.fft.rfftfreq(frame, 1.0 / sr)
+        window = np.hanning(frame)
+        prev_mag = None
+        for i in range(n):
+            seg = audio[i * frame:(i + 1) * frame] * window
+            mag = np.abs(np.fft.rfft(seg)) + 1e-9
+            mag_norm = mag / np.sum(mag)
+            centroids.append(float(np.sum(freqs * mag) / np.sum(mag)))
+            if prev_mag is not None:
+                fluxes.append(float(np.sum((mag_norm - prev_mag) ** 2)))
+            prev_mag = mag_norm
+
+        c = np.array(centroids)
+        c = np.convolve(c, np.ones(3) / 3, mode="valid")
+        d = np.abs(np.diff(c))
+        med = float(np.median(d))
+        mad = float(np.median(np.abs(d - med))) * 1.4826 + 1e-3 * (float(np.median(c)) + 1.0)
+        z_cent = float(np.max((d - med) / mad)) if mad > 0 else 0.0
+
+        z_flux = 0.0
+        if len(fluxes) >= 6:
+            fl = np.array(fluxes)
+            med_fl = float(np.median(fl))
+            mad_fl = float(np.median(np.abs(fl - med_fl))) * 1.4826 + 1e-6
+            z_flux = float(np.max((fl - med_fl) / mad_fl)) if mad_fl > 0 else 0.0
+
+        max_z = max(max_z, z_cent, z_flux * 0.7)
+
+    return float(max_z)
 
 
 def analyze_audio(audio_path: Optional[str]) -> ModalityEvidence:
@@ -153,9 +174,10 @@ def analyze_audio(audio_path: Optional[str]) -> ModalityEvidence:
             
         splice_z = spectral_discontinuity(str(path))
         features["splice_z"] = splice_z
-        if splice_z > 12.0:
-            anomaly_score += 0.35
-            evidence_parts.append(f"Abrupt spectral discontinuity (z={splice_z:.1f}) suggests the recording was spliced from different sources.")
+        if splice_z > 8.0:
+            splice_contrib = float(np.clip((splice_z - 8.0) / 12.0 * 0.35 + 0.15, 0.15, 0.45))
+            anomaly_score += splice_contrib
+            evidence_parts.append(f"Abrupt multi-scale spectral discontinuity (z={splice_z:.1f}) suggests the recording was spliced from different sources.")
 
         # Optional learned spoof classifier: adds evidence, never clears a heuristic anomaly.
         try:

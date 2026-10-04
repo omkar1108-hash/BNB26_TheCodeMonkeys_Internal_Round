@@ -1,7 +1,6 @@
 import pytest
 from backend.claims.extractor import extract_claims
 from backend.claims.conflict import find_bundle_contradictions, find_conflicts
-from backend.claims.evidence_graph import build_evidence_graph
 from backend.models.bundle import ExtractedClaims
 
 
@@ -36,13 +35,13 @@ def test_bundle_contradictions():
     assert "location" in fields
 
 
+from backend.claims.evidence_graph import build_bundle_graph
+
+
 def test_evidence_graph_building():
-    files = [{"file_id": "f1", "filename": "sample.jpg", "modality": "image"}]
-    claims = [{"claim_id": "c1", "file_id": "f1", "text": "Event happened"}]
-    conflicts = []
-    
-    graph = build_evidence_graph(files, claims, conflicts)
+    claims = {"doc1": ExtractedClaims(dates=["15 September 2026"], locations=["Mumbai"])}
+    graph = build_bundle_graph(claims, None, {}, None, [])
     assert "nodes" in graph
     assert "edges" in graph
-    assert len(graph["nodes"]) == 2
-    assert len(graph["edges"]) == 1
+    assert len(graph["nodes"]) >= 2
+    assert len(graph["edges"]) >= 2

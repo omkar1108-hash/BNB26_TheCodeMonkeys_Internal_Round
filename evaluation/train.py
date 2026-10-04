@@ -23,7 +23,7 @@ from evaluation.features import ensure_datasets
 from evaluation.metrics import compute_ece
 
 XGB_PARAMS = dict(
-    n_estimators=150, max_depth=4, learning_rate=0.1, subsample=0.9, colsample_bytree=0.9,
+    n_estimators=150, max_depth=3, min_child_weight=2, learning_rate=0.1, subsample=0.85, colsample_bytree=0.85,
     objective="multi:softprob", eval_metric="mlogloss", random_state=0, n_jobs=1,
 )
 ALPHA = 0.10
@@ -56,7 +56,7 @@ def calibrate(model, calib_X, calib_y, columns=None):
     return T, conformal_qhat(pc, calib_y, ALPHA)
 
 
-def main(regen: bool = False):
+def main(regen: bool = False, apply_artifacts: bool = False):
     tables = ensure_datasets(DATASETS_DIR, regenerate=regen)
     tr, ca, te = tables["train"], tables["calib"], tables["test"]
     print(f"train={len(tr.y)}  calib={len(ca.y)}  test={len(te.y)} bundles")
@@ -82,20 +82,32 @@ def main(regen: bool = False):
                 "See evaluation.run_eval for unseen-technique (LOTO) results.",
     }
 
-    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    model.save_model(str(MODEL_PATH))
-    CALIBRATION_PATH.write_text(json.dumps({
+    cand_model = MODEL_PATH.parent / "xgb_bundle_candidate.json"
+    cand_calib = CALIBRATION_PATH.parent / "calibration_candidate.json"
+    cand_model.parent.mkdir(parents=True, exist_ok=True)
+    model.save_model(str(cand_model))
+    calib_dict = {
         "temperature": T, "conformal_qhat": qhat, "alpha": ALPHA, "fitted": True,
         "fitted_on": "synthetic_calib (seed 99)",
-    }, indent=2))
+    }
+    cand_calib.write_text(json.dumps(calib_dict, indent=2))
+
+    if apply_artifacts:
+        model.save_model(str(MODEL_PATH))
+        CALIBRATION_PATH.write_text(json.dumps(calib_dict, indent=2))
+        print(f"Applied to {MODEL_PATH.name} and {CALIBRATION_PATH.name}")
+    else:
+        print(f"Saved {cand_model.name} and {cand_calib.name} (original artifacts preserved pending approval)")
+
     out = Path(__file__).resolve().parent / "results"
     out.mkdir(exist_ok=True)
     (out / "training_report.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
-    print(f"Saved {MODEL_PATH.name} and {CALIBRATION_PATH.name}")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--regen", action="store_true")
-    main(ap.parse_args().regen)
+    ap.add_argument("--apply", action="store_true", help="Apply candidate artifacts to production xgb_bundle.json")
+    args = ap.parse_args()
+    main(regen=args.regen, apply_artifacts=args.apply)

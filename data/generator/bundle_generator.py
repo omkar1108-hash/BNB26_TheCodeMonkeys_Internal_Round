@@ -22,16 +22,40 @@ from PIL import Image, ImageDraw, ImageFilter
 from backend.config import DATASETS_DIR
 from backend.models.bundle import BundleInput
 
-CITIES = ["Mumbai", "Pune", "Bengaluru", "Delhi", "Chennai", "Hyderabad", "Kolkata", "Ahmedabad"]
-VENUES = ["Convention Center", "City Auditorium", "Town Hall", "Institute of Technology", "Exhibition Grounds"]
-EVENTS = ["Annual Innovation Summit", "TechFest 2026", "Regional Flood Relief Briefing", "Clean Energy Expo",
-          "Public Health Awareness Drive", "Startup Founders Meetup"]
-SPEAKERS = ["Rajesh Sharma", "Anita Desai", "Imran Khan", "Meera Nair", "Vikram Patel", "Sunita Rao"]
-HONORIFICS = ["Dr. ", "Prof. ", ""]
-ORGS = ["the Computer Department", "the City Council", "the Health Ministry", "the Industry Forum"]
-MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August",
-          "September", "October", "November", "December"]
-CAMERAS = [("Sony", "Alpha A7 IV"), ("Nikon", "Z9"), ("Canon", "EOS R6"), ("Apple", "iPhone 15"), ("Samsung", "Galaxy S24")]
+CITIES = [
+    "Mumbai", "Pune", "Bengaluru", "Delhi", "Chennai", "Hyderabad", "Kolkata", "Ahmedabad",
+    "Jaipur", "Lucknow", "Chandigarh", "Kochi", "Indore", "Bhopal", "Nagpur", "Surat",
+    "London", "Singapore", "Dubai", "New York", "San Francisco"
+]
+VENUES = [
+    "Convention Center", "City Auditorium", "Town Hall", "Institute of Technology",
+    "Exhibition Grounds", "Science City", "International Center", "University Campus",
+    "Community Hall", "Grand Pavilion", "Business Park"
+]
+EVENTS = [
+    "Annual Innovation Summit", "TechFest 2026", "Regional Flood Relief Briefing",
+    "Clean Energy Expo", "Public Health Awareness Drive", "Startup Founders Meetup",
+    "Global AI Conclave", "Cybersecurity Forum", "National Science Congress",
+    "Economic Development Summit", "Disaster Resilience Workshop"
+]
+SPEAKERS = [
+    "Rajesh Sharma", "Anita Desai", "Imran Khan", "Meera Nair", "Vikram Patel",
+    "Sunita Rao", "Arun Varma", "Pooja Hegde", "Siddharth Roy", "Deepa Malik",
+    "Kavita Krishnan", "Rohan Joshi", "Amitav Sen", "Priyanka Das"
+]
+HONORIFICS = ["Dr. ", "Prof. ", "Mr. ", "Ms. ", ""]
+ORGS = [
+    "the Computer Department", "the City Council", "the Health Ministry",
+    "the Industry Forum", "the National Science Foundation", "the Tech Advisory Board"
+]
+MONTHS = [
+    "January", "February", "March", "April", "May", "June", "July", "August",
+    "September", "October", "November", "December"
+]
+CAMERAS = [
+    ("Sony", "Alpha A7 IV"), ("Nikon", "Z9"), ("Canon", "EOS R6"), ("Apple", "iPhone 15"),
+    ("Samsung", "Galaxy S24"), ("Google", "Pixel 8"), ("Fujifilm", "X-T5"), ("Xiaomi", "14 Ultra")
+]
 
 # technique -> (label, family)
 TECHNIQUES: Dict[str, Tuple[str, str]] = {
@@ -39,6 +63,7 @@ TECHNIQUES: Dict[str, Tuple[str, str]] = {
     "authentic_full": ("authentic", "authentic"),
     "authentic_partial": ("authentic", "authentic"),
     "authentic_two_sources": ("authentic", "authentic"),
+    "authentic_hard_negative": ("authentic", "authentic"),
     # single-artifact manipulation
     "image_noise_patch": ("manipulated", "image"),
     "image_double_jpeg": ("manipulated", "image"),
@@ -69,7 +94,7 @@ TECHNIQUES: Dict[str, Tuple[str, str]] = {
 # ---------------------------------------------------------------------------
 def generate_synthetic_image(output_path: Path, technique: Optional[str] = None,
                              rng: Optional[np.random.Generator] = None, launder_prob: float = 0.0):
-    """Photo-like image: gradient + shapes + sensor noise, optionally manipulated."""
+    """Photo-like image: gradient + shapes + sensor noise, optionally manipulated with randomized patch location/size."""
     rng = rng or np.random.default_rng()
     h = w = 256
     c0 = rng.integers(40, 200, 3)
@@ -78,63 +103,84 @@ def generate_synthetic_image(output_path: Path, technique: Optional[str] = None,
     base = (c0[None, None, :] * (1 - ramp) + c1[None, None, :] * ramp) * np.ones((h, 1, 1))
     img = Image.fromarray(np.clip(base, 0, 255).astype(np.uint8))
     draw = ImageDraw.Draw(img)
-    for _ in range(int(rng.integers(4, 8))):
+    for _ in range(int(rng.integers(4, 9))):
         x1, y1 = int(rng.integers(10, 190)), int(rng.integers(10, 190))
-        draw.rectangle([x1, y1, x1 + int(rng.integers(25, 60)), y1 + int(rng.integers(25, 60))],
+        draw.rectangle([x1, y1, x1 + int(rng.integers(25, 65)), y1 + int(rng.integers(25, 65))],
                        fill=tuple(int(v) for v in rng.integers(0, 255, 3)))
-    arr = np.array(img).astype(np.float32) + rng.normal(0, 3.0, (h, w, 3))  # sensor noise
+    noise_sigma = float(rng.uniform(2.0, 4.5))
+    arr = np.array(img).astype(np.float32) + rng.normal(0, noise_sigma, (h, w, 3))  # sensor noise
     img = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
-    box = (50, 50, 120, 120)
+    # Randomize patch size and position across the frame
+    pw = int(rng.integers(35, 110))
+    ph = int(rng.integers(35, 110))
+    px = int(rng.integers(10, max(11, w - pw - 10)))
+    py = int(rng.integers(10, max(11, h - ph - 10)))
+    box = (px, py, px + pw, py + ph)
+
     if technique == "image_noise_patch":
-        noise = Image.fromarray(rng.integers(0, 256, (70, 70, 3), dtype=np.uint8))
+        noise = Image.fromarray(rng.integers(0, 256, (ph, pw, 3), dtype=np.uint8))
         img.paste(noise, box[:2])
     elif technique == "image_double_jpeg":
         patch = img.crop(box)
         buf = io.BytesIO()
-        patch.save(buf, "JPEG", quality=25)
+        recomp_q = int(rng.integers(15, 45))
+        patch.save(buf, "JPEG", quality=recomp_q)
         buf.seek(0)
         img.paste(Image.open(buf).convert("RGB"), box[:2])
     elif technique == "image_blur_patch":
-        img.paste(img.crop(box).filter(ImageFilter.GaussianBlur(3)), box[:2])
-    img.save(output_path, "JPEG", quality=92)
+        blur_rad = float(rng.uniform(2.5, 6.0))
+        img.paste(img.crop(box).filter(ImageFilter.GaussianBlur(blur_rad)), box[:2])
+
+    base_q = int(rng.integers(88, 96))
+    img.save(output_path, "JPEG", quality=base_q)
     if launder_prob and rng.random() < launder_prob:
         # Simulate re-sharing: lossy re-compression and (sometimes) rescaling.
         im = Image.open(output_path).convert("RGB")
         if rng.random() < 0.5:
-            f = float(rng.uniform(0.75, 1.0))
+            f = float(rng.uniform(0.70, 0.95))
             im = im.resize((int(256 * f), int(256 * f))).resize((256, 256))
-        im.save(output_path, "JPEG", quality=int(rng.integers(68, 90)))
+        im.save(output_path, "JPEG", quality=int(rng.integers(60, 88)))
 
 
 def generate_synthetic_audio(output_path: Path, technique: Optional[str] = None,
-                             rng: Optional[np.random.Generator] = None):
-    """Speech-like 16 kHz WAV: harmonic series + breath noise, optionally manipulated."""
+                             rng: Optional[np.random.Generator] = None,
+                             low_bitrate: bool = False):
+    """Speech-like 16 kHz WAV: harmonic series + breath noise, optionally manipulated with varied duration and cutoff."""
     rng = rng or np.random.default_rng()
-    sr, dur = 16000, 2.0
+    sr = 16000
+    dur = float(rng.uniform(1.8, 2.5))
     n = int(sr * dur)
     t = np.arange(n) / sr
-    f0 = float(rng.uniform(110, 240))
+    f0 = float(rng.uniform(105, 250))
     sig = np.zeros(n)
     for k in range(1, int(7000 / f0)):
         sig += (1.0 / k) * np.sin(2 * np.pi * f0 * k * t + rng.uniform(0, 6.28))
-    sig *= 0.6 + 0.4 * np.sin(2 * np.pi * 3.0 * t)  # syllable-rate amplitude modulation
-    sig += rng.normal(0, 0.03, n)
+    mod_f = float(rng.uniform(2.5, 4.0))
+    sig *= 0.6 + 0.4 * np.sin(2 * np.pi * mod_f * t)  # syllable-rate amplitude modulation
+    noise_lvl = float(rng.uniform(0.015, 0.055))
+    sig += rng.normal(0, noise_lvl, n)
 
     if technique == "audio_vocoder_noise":
-        sig += 0.8 * rng.uniform(-1, 1, n)
+        sig += float(rng.uniform(0.55, 0.95)) * rng.uniform(-1, 1, n)
     elif technique == "audio_bandlimit":
         spec = np.fft.rfft(sig)
         freqs = np.fft.rfftfreq(n, 1 / sr)
-        spec[freqs > 2000] = 0
+        cutoff = float(rng.uniform(1800, 2400))
+        spec[freqs > cutoff] = 0
         sig = np.fft.irfft(spec, n)
     elif technique == "audio_splice":
-        cut = n // 2
+        cut_frac = float(rng.uniform(0.35, 0.65))
+        cut = int(n * cut_frac)
         other = np.zeros(n - cut)
-        f1 = f0 * float(rng.uniform(1.4, 1.8))
+        f1 = f0 * float(rng.uniform(1.3, 1.9))
         for k in range(1, int(7000 / f1)):
             other += (1.0 / k) * np.sin(2 * np.pi * f1 * k * t[: n - cut])
         sig = np.concatenate([sig[:cut], other * (np.max(np.abs(sig)) / (np.max(np.abs(other)) + 1e-9))])
+
+    if low_bitrate:
+        # Simulate quantization / ambient noise
+        sig += rng.normal(0, 0.06, n)
 
     sig = sig / (np.max(np.abs(sig)) + 1e-9) * 0.8
     pcm = (sig * 32767).astype(np.int16)
@@ -154,7 +200,13 @@ def _fmt_date(d: Tuple[int, int, int], style: int) -> str:
         return f"{day} {MONTHS[m - 1]} {y}"
     if style == 1:
         return f"{MONTHS[m - 1]} {day}, {y}"
-    return f"{y:04d}-{m:02d}-{day:02d}"
+    if style == 2:
+        return f"{y:04d}-{m:02d}-{day:02d}"
+    if style == 3:
+        return f"{day:02d}/{m:02d}/{y:04d}"
+    # Ordinal suffix format: e.g. "15th September 2026"
+    suffix = "th" if 11 <= day <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+    return f"{day}{suffix} {MONTHS[m - 1]} {y}"
 
 
 def _rand_date(rnd: random.Random, avoid: Optional[Tuple[int, int, int]] = None) -> Tuple[int, int, int]:
@@ -201,7 +253,7 @@ def build_spec(technique: str, rnd: random.Random) -> Dict[str, Any]:
     speaker = rnd.choice(SPEAKERS)
     org = rnd.choice(ORGS)
     template = rnd.randint(0, 3)
-    date_style = rnd.randint(0, 2)
+    date_style = rnd.randint(0, 4)
     honorific = rnd.choice(HONORIFICS)
 
     spec: Dict[str, Any] = dict(
@@ -231,9 +283,24 @@ def build_spec(technique: str, rnd: random.Random) -> Dict[str, Any]:
         if has_aud:
             spec["claimed_speaker"] = spk_name
     elif technique == "authentic_two_sources":
-        spec["docs"] = {"message": true_text(spk_name), "report": _make_text(rnd, event, venue, city, date, None, org, (template + 1) % 4, (date_style + 1) % 3)}
+        spec["docs"] = {"message": true_text(spk_name), "report": _make_text(rnd, event, venue, city, date, None, org, (template + 1) % 4, (date_style + 1) % 5)}
         if rnd.random() > 0.5:
             spec["meta"] = _make_meta(rnd, date, city)
+    elif technique == "authentic_hard_negative":
+        # Hard negative authentic: re-compressed image, missing EXIF or camera stripped,
+        # noisy/ambient audio, or short caption. Label is strictly authentic.
+        spec["image"] = "clean"
+        spec["audio"] = "clean"
+        if rnd.random() > 0.5:
+            spec["meta"] = _make_meta(rnd, date, city, camera=False)
+        else:
+            spec["meta"] = None
+        if rnd.random() > 0.5:
+            spec["docs"] = {"caption": f"At {venue}, {city} on {_fmt_date(date, date_style)}. {spk_name} addressed the audience."}
+        else:
+            spec["docs"] = {"caption": true_text(spk_name)}
+        spec["claimed_speaker"] = spk_name
+        spec["hard_negative"] = True
     elif family == "image":
         spec["image"] = technique
         spec["docs"] = {"caption": true_text()}
@@ -319,13 +386,15 @@ def _write_bundle(spec: Dict[str, Any], bundle_dir: Path, base_dir: Path,
         "image_path": None, "audio_path": None, "metadata_path": None,
         "documents": {}, "claimed_speaker": spec["claimed_speaker"],
     }
+    is_hard_neg = spec.get("hard_negative", False)
+    img_launder = 1.0 if is_hard_neg else launder_prob
     if spec["image"]:
         p = bundle_dir / "image.jpg"
-        generate_synthetic_image(p, None if spec["image"] == "clean" else spec["image"], rng, launder_prob)
+        generate_synthetic_image(p, None if spec["image"] == "clean" else spec["image"], rng, img_launder)
         rec["image_path"] = rel(p)
     if spec["audio"]:
         p = bundle_dir / "audio.wav"
-        generate_synthetic_audio(p, None if spec["audio"] == "clean" else spec["audio"], rng)
+        generate_synthetic_audio(p, None if spec["audio"] == "clean" else spec["audio"], rng, low_bitrate=is_hard_neg)
         rec["audio_path"] = rel(p)
     if spec["meta"]:
         p = bundle_dir / "metadata.json"

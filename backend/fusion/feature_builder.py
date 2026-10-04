@@ -13,7 +13,9 @@ FEATURE_NAMES = [
     "has_audio",
     "has_text",
     "has_metadata",
+    # RESERVED CONSTANT (index 8): image_text_similarity (constant 0.5; CLIP is used as an authenticity guard, not in XGBoost)
     "image_text_similarity",
+    # RESERVED CONSTANT (index 9): speaker_similarity (constant 0.5 baseline; biometric enrollment profile required)
     "speaker_similarity",
     "metadata_conflict_count",
     "contradiction_count",
@@ -24,12 +26,20 @@ FEATURE_NAMES = [
     "speaker_conflict",
     "date_conflicts",
     "location_conflicts",
+    # RESERVED CONSTANT (index 18): has_clip_similarity (constant 0.0)
     "has_clip_similarity",
     # modality-agnostic aggregates: let the model generalise to detectors/techniques it never saw fire
     "max_modality_anomaly",
     "n_anomalous_modalities",
     "total_conflicts",
     "image_reliability",
+    # --- technique-agnostic features & authentic centroid distance (indices 23+) ---
+    "mean_modality_anomaly",
+    "anomaly_spread",
+    "top1_top2_margin",
+    "n_detectors_above_30",
+    "n_detectors_above_60",
+    "authentic_centroid_distance",
 ]
 
 # Which feature columns each modality owns. Used for ablations and counterfactuals.
@@ -120,6 +130,36 @@ def build_fusion_features(
         q = img_ev.features.get("jpeg_quality") if img_ev.features else None
         image_reliability = 0.8 if q is None else float(np.clip((q - 50.0) / 40.0, 0.0, 1.0))
 
+    # Technique-agnostic features across available modalities
+    avail_scores = []
+    diffs_sq = []
+    if has_image:
+        avail_scores.append(image_score)
+        diffs_sq.append((image_score - 0.10) ** 2)
+    if has_audio:
+        avail_scores.append(audio_score)
+        diffs_sq.append((audio_score - 0.15) ** 2)
+    if has_text:
+        avail_scores.append(text_score)
+        diffs_sq.append((text_score - 0.15) ** 2)
+    if has_metadata:
+        avail_scores.append(metadata_score)
+        diffs_sq.append((metadata_score - 0.10) ** 2)
+
+    mean_modality_anomaly = float(np.mean(avail_scores)) if avail_scores else 0.0
+    anomaly_spread = float(max(avail_scores) - min(avail_scores)) if len(avail_scores) >= 2 else 0.0
+    if len(avail_scores) >= 2:
+        s_sorted = sorted(avail_scores, reverse=True)
+        top1_top2_margin = float(s_sorted[0] - s_sorted[1])
+    elif len(avail_scores) == 1:
+        top1_top2_margin = float(avail_scores[0])
+    else:
+        top1_top2_margin = 0.0
+
+    n_detectors_above_30 = float(sum(1 for sc in avail_scores if sc > 0.30))
+    n_detectors_above_60 = float(sum(1 for sc in avail_scores if sc > 0.60))
+    authentic_centroid_distance = float(np.sqrt(np.mean(diffs_sq))) if diffs_sq else 0.0
+
     vector = np.array([
         image_score,
         audio_score,
@@ -144,6 +184,12 @@ def build_fusion_features(
         n_anomalous,
         total_conflicts,
         image_reliability,
+        mean_modality_anomaly,
+        anomaly_spread,
+        top1_top2_margin,
+        n_detectors_above_30,
+        n_detectors_above_60,
+        authentic_centroid_distance,
     ], dtype=np.float32)
 
     return vector

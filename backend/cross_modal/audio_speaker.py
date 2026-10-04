@@ -1,7 +1,6 @@
-import wave
 from pathlib import Path
 from typing import Optional, Tuple
-import numpy as np
+from backend.learned import registry
 
 
 def verify_claimed_speaker(
@@ -14,28 +13,17 @@ def verify_claimed_speaker(
     """
     if not audio_path or not claimed_speaker or not Path(audio_path).exists():
         return None, False, None
-        
+
+    if not registry.enabled():
+        return None, False, None
+
     try:
-        # Read pitch and energy profile
-        with wave.open(audio_path, "rb") as wf:
-            framerate = wf.getframerate()
-            n_frames = min(wf.getnframes(), framerate * 5)  # 5 seconds
-            raw_bytes = wf.readframes(n_frames)
-            
-        audio = np.frombuffer(raw_bytes, dtype=np.int16).astype(np.float32)
-        if len(audio) == 0:
-            return 0.5, True, "Empty audio stream"
-            
-        # Spectral energy check
-        rms = float(np.sqrt(np.mean(audio ** 2)))
-        if rms < 50.0:  # silence
-            return 0.1, False, None
-            
-        # Baseline acoustic match heuristic
-        # If speaker name is provided, authentic recordings typically match nominal conversational profile
-        similarity = 0.82
-        return similarity, False, None
-        
+        from speechbrain.inference.speaker import SpeakerRecognition  # lazy import
+        # SpeechBrain ECAPA-TDNN would compare the audio embedding against an enrolled reference voice
+        return None, True, "SpeechBrain ECAPA-TDNN requires an enrolled reference voice profile"
+    except ImportError:
+        return None, True, "SpeechBrain ECAPA-TDNN not installed; acoustic speaker verification unavailable"
     except Exception as e:
-        return 0.50, True, f"Speaker verification fallback triggered: {str(e)}"
+        return None, True, f"Speaker verification error: {str(e)}"
+
 

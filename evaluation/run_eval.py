@@ -25,10 +25,9 @@ from sklearn.preprocessing import label_binarize
 from backend.config import TARGET_CLASSES, DATASETS_DIR
 from backend.fusion.calibration import TemperatureScaler
 from backend.fusion.abstention import evaluate_abstention, conformal_prediction_set
-from backend.fusion.feature_builder import FEATURE_INDEX, MODALITY_COLUMNS
-from backend.fusion.decision import decide, reliability_guard
+from backend.fusion.decision import decide, reliability_guard, ood_guard
+from backend.fusion.feature_builder import FEATURE_INDEX, MODALITY_COLUMNS, build_fusion_features
 from backend.learned import registry
-from backend.fusion.feature_builder import build_fusion_features
 from backend.verdict.engine import compute_bundle_signals
 from data.generator.bundle_generator import TECHNIQUES, record_to_bundle
 from evaluation.features import ensure_datasets, Table
@@ -48,6 +47,8 @@ def decisions(P_cal: np.ndarray, X: np.ndarray, qhat) -> List[Tuple[str, float]]
         total = float(x[FEATURE_INDEX["total_modalities_present"]]) + max(0.0, float(x[FEATURE_INDEX["n_text_sources"]]) - 1.0)
         ab, _, label, conf = evaluate_abstention(probs, total, conformal_set=conformal_prediction_set(probs, qhat))
         if not ab and reliability_guard(x, label):
+            label = "insufficient_evidence"
+        elif not ab and ood_guard(x):
             label = "insufficient_evidence"
         out.append((label, conf))
     return out
@@ -169,7 +170,11 @@ def ablation(tr: Table, te: Table) -> Dict:
         "all detectors (no cross-modal)": det_cols,
         "detectors + cross-modal, no aggregate features": [
             i for n, i in FEATURE_INDEX.items()
-            if n not in ("max_modality_anomaly", "n_anomalous_modalities", "total_conflicts", "image_reliability")
+            if n not in (
+                "max_modality_anomaly", "n_anomalous_modalities", "total_conflicts", "image_reliability",
+                "mean_modality_anomaly", "anomaly_spread", "top1_top2_margin",
+                "n_detectors_above_30", "n_detectors_above_60", "authentic_centroid_distance"
+            )
         ],
         "detectors + cross-modal + aggregates (full)": list(range(tr.X.shape[1])),
     }

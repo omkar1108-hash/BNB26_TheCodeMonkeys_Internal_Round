@@ -1,3 +1,5 @@
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 from PIL import Image, ExifTags
@@ -9,6 +11,20 @@ SUSPICIOUS_SOFTWARE_KEYWORDS = [
     "photoshop", "gimp", "canva", "midjourney", "stable diffusion",
     "dall-e", "novelai", "automatic1111", "comfyui", "invokeai", "paint.net"
 ]
+
+
+def parse_exif_timestamp(value: Any) -> Optional[datetime]:
+    if not value:
+        return None
+    v = str(value).strip()
+    m = re.match(r"^(\d{4})[:\-/](\d{1,2})[:\-/](\d{1,2})[ T](\d{1,2}):(\d{1,2}):(\d{1,2})", v)
+    if m:
+        try:
+            return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)),
+                            int(m.group(4)), int(m.group(5)), int(m.group(6)))
+        except ValueError:
+            return None
+    return None
 
 
 def extract_exif_dict(image_path: str) -> Dict[str, Any]:
@@ -82,12 +98,28 @@ def analyze_metadata(
     elif has_make:
         evidence_parts.append(f"Camera hardware profile recorded: {combined_meta.get('Make', '')} {combined_meta.get('Model', '')}.")
         
-    # 3. Check timestamps
+    # 3. Check timestamps (graded by gap size: <5s clean, >1h 0.25, >24h 0.50)
     datetime_original = combined_meta.get("DateTimeOriginal")
     datetime_modified = combined_meta.get("DateTime")
-    if datetime_original and datetime_modified and datetime_original != datetime_modified:
-        anomaly_score += 0.20
-        evidence_parts.append(f"Timestamp discrepancy between capture ({datetime_original}) and file write ({datetime_modified}).")
+    gap_seconds = None
+    if datetime_original and datetime_modified:
+        dt_orig = parse_exif_timestamp(datetime_original)
+        dt_mod = parse_exif_timestamp(datetime_modified)
+        if dt_orig and dt_mod:
+            gap_seconds = abs((dt_mod - dt_orig).total_seconds())
+            if gap_seconds > 86400:  # > 24 hours
+                anomaly_score += 0.50
+                evidence_parts.append(f"Major timestamp gap ({gap_seconds / 3600:.1f} hours) between capture ({datetime_original}) and file write ({datetime_modified}).")
+            elif gap_seconds > 3600:  # > 1 hour
+                anomaly_score += 0.25
+                evidence_parts.append(f"Timestamp gap ({gap_seconds / 60:.1f} minutes) between capture ({datetime_original}) and file write ({datetime_modified}).")
+            elif gap_seconds >= 5:  # 5s to 1 hour
+                anomaly_score += 0.10
+                evidence_parts.append(f"Minor timestamp gap ({gap_seconds:.0f} seconds) between capture ({datetime_original}) and file write ({datetime_modified}).")
+            # If gap_seconds < 5s: clean (0 added)
+        elif datetime_original != datetime_modified:
+            anomaly_score += 0.20
+            evidence_parts.append(f"Timestamp discrepancy between capture ({datetime_original}) and file write ({datetime_modified}).")
         
     anomaly_score = float(min(0.95, max(0.05, anomaly_score)))
     
@@ -99,6 +131,7 @@ def analyze_metadata(
         features={
             "software_tampered": 1.0 if tampered_software else 0.0,
             "has_camera_profile": 1.0 if has_make else 0.0,
+            "timestamp_gap_seconds": gap_seconds if gap_seconds is not None else 0.0,
             "metadata_anomaly": anomaly_score
         },
         is_fallback=False

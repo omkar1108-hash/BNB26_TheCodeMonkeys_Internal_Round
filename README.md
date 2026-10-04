@@ -118,8 +118,8 @@ curl -X POST localhost:8000/api/bundle/analyze -H "Content-Type: application/jso
 ## Tests
 
 ```bash
-python -m pytest tests -q        # 45 tests: normalisation, cross-modal rules, conformal/temperature maths, abstention,
-                                 # the four demo verdicts, API, learned-model plumbing (stubbed, no weights needed)
+python -m pytest tests -q        # 76 tests: normalisation, cross-modal rules, conformal/temperature maths, abstention,
+                                 # the four demo verdicts, API & schema validation, learned-model plumbing (stubbed, no weights needed)
 ```
 
 ## Architecture
@@ -138,16 +138,16 @@ a splice detector (spectral discontinuity), plus the optional learned wav2vec2 s
 Metadata: editing/AI-tool signatures, missing camera profile, timestamp gap.
 
 **Layer 2 (implemented).** Cross-source contradictions (date/location/entity/speaker), metadata-vs-claims, claimed-speaker
-vs. other sources, and image-text agreement via CLIP *when its weights are cached locally* (otherwise reported as skipped,
-never guessed).
+vs. other sources (speaker mismatch is detected through conflicting claims; acoustic speaker embedding verification is a fallback stub),
+and image-text agreement via CLIP *when its weights are cached locally* (used as an authenticity guard and evidence, not an active XGBoost feature).
 
 ## Evaluation (synthetic benchmark)
 
 Full tables: `evaluation/results/EVAL_REPORT.md`. Headline (each manipulation technique held out of training and calibration):
 
-* Unseen-technique accuracy **82.7%**, macro-F1 **0.81**, AUROC **0.98**, **0%** false accusations of authentic bundles.
-* All six cross-modal (coordinated) techniques: **100%** correct when held out.
-* Why cross-modal reasoning matters: coordinated-class recall on unseen techniques is **0.38** with detectors alone and **1.00** with cross-modal features.
+* Unseen-technique accuracy **82.4%** (0.8242), macro-F1 **0.810** (0.8102), AUROC **0.978** (0.9776), ECE **0.147** (0.1468), **0%** false accusations of authentic bundles.
+* All six cross-modal (coordinated) techniques: **97.2%** recall when held out.
+* Why cross-modal reasoning matters: coordinated-class recall on unseen techniques is **0.38** with detectors alone and **0.97** with cross-modal features.
 * Conformal prediction sets reach ~90% empirical coverage on the test split.
 
 ## Honest limitations

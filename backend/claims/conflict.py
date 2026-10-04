@@ -123,4 +123,3 @@ def find_conflicts(claims: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                         "severity": "high"
                     })
     return conflicts
-    return conflicts

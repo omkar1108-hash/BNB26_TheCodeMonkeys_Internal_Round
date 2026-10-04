@@ -82,7 +82,10 @@ class BundleClassifier:
         X = np.atleast_2d(X)
         if self.model is None:
             return np.array([[rule_based_proba(r)[c] for c in self.classes] for r in X])
-        raw = self.model.predict_proba(X)
+        X_in = X
+        if hasattr(self.model, "n_features_in_") and self.model.n_features_in_ < X.shape[1]:
+            X_in = X[:, :self.model.n_features_in_]
+        raw = self.model.predict_proba(X_in)
         out = np.zeros((len(X), len(self.classes)))
         for col, cls_idx in enumerate(self.model.classes_):
             out[:, int(cls_idx)] = raw[:, col]

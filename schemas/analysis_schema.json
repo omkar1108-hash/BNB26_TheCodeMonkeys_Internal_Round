@@ -1,116 +1,366 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "TrustLayer Bundle Analysis Result",
-  "description": "Schema for multimodal bundle verification, calibrated probabilities, and evidence ranking",
-  "type": "object",
-  "required": [
-    "bundle_id",
-    "verdict",
-    "modality_results",
-    "ranked_evidence"
-  ],
-  "properties": {
-    "bundle_id": {
-      "type": "string"
-    },
-    "verdict": {
-      "type": "object",
+  "$defs": {
+    "ContradictionItem": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "value_a": {
+          "title": "Value A",
+          "type": "string"
+        },
+        "value_b": {
+          "title": "Value B",
+          "type": "string"
+        },
+        "source_a": {
+          "title": "Source A",
+          "type": "string"
+        },
+        "source_b": {
+          "title": "Source B",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "severity": {
+          "default": "medium",
+          "title": "Severity",
+          "type": "string"
+        }
+      },
       "required": [
+        "field",
+        "value_a",
+        "value_b",
+        "source_a",
+        "source_b",
+        "description"
+      ],
+      "title": "ContradictionItem",
+      "type": "object"
+    },
+    "Counterfactual": {
+      "description": "What the verdict would be if one artifact were removed from the bundle.",
+      "properties": {
+        "removed": {
+          "title": "Removed",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        },
+        "flips_verdict": {
+          "default": false,
+          "title": "Flips Verdict",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "removed",
         "label",
         "confidence"
       ],
-      "properties": {
-        "label": {
-          "type": "string",
-          "enum": [
-            "authentic",
-            "manipulated",
-            "coordinated_synthetic",
-            "insufficient_evidence",
-            "Authentic",
-            "Manipulated",
-            "Coordinated fake",
-            "Not enough evidence"
-          ]
-        },
-        "confidence": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "probabilities": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        "abstained": {
-          "type": "boolean"
-        },
-        "abstain_reason": {
-          "type": ["string", "null"]
-        },
-        "report": {
-          "type": "string"
-        },
-        "report_verified": {
-          "type": "boolean"
-        },
-        "is_fallback": {
-          "type": "boolean"
-        }
-      }
+      "title": "Counterfactual",
+      "type": "object"
     },
-    "modality_results": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "modality": { "type": "string" },
-          "present": { "type": "boolean" },
-          "score": { "type": "number" },
-          "evidence": { "type": "string" },
-          "features": { "type": "object" },
-          "is_fallback": { "type": "boolean" }
-        }
-      }
-    },
-    "cross_modal_results": {
-      "type": ["object", "null"],
+    "CrossModalEvidence": {
       "properties": {
-        "image_text_similarity": { "type": ["number", "null"] },
-        "speaker_similarity": { "type": ["number", "null"] },
+        "image_text_similarity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Text Similarity"
+        },
+        "speaker_similarity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Speaker Similarity"
+        },
         "metadata_conflicts": {
-          "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          },
+          "title": "Metadata Conflicts",
+          "type": "array"
         },
         "contradictions": {
-          "type": "array",
           "items": {
-            "type": "object"
-          }
+            "$ref": "#/$defs/ContradictionItem"
+          },
+          "title": "Contradictions",
+          "type": "array"
         },
-        "is_fallback": { "type": "boolean" }
-      }
+        "n_text_sources": {
+          "default": 0,
+          "title": "N Text Sources",
+          "type": "integer"
+        },
+        "is_fallback": {
+          "default": false,
+          "title": "Is Fallback",
+          "type": "boolean"
+        },
+        "fallback_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fallback Reason"
+        }
+      },
+      "title": "CrossModalEvidence",
+      "type": "object"
+    },
+    "EvidenceItem": {
+      "properties": {
+        "rank": {
+          "title": "Rank",
+          "type": "integer"
+        },
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "modality": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Modality"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "importance": {
+          "default": 0.0,
+          "title": "Importance",
+          "type": "number"
+        },
+        "is_fallback": {
+          "default": false,
+          "title": "Is Fallback",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rank",
+        "category",
+        "description"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "ModalityEvidence": {
+      "properties": {
+        "modality": {
+          "title": "Modality",
+          "type": "string"
+        },
+        "present": {
+          "default": true,
+          "title": "Present",
+          "type": "boolean"
+        },
+        "score": {
+          "default": 0.0,
+          "description": "Synthetic / manipulation anomaly score (0=clean, 1=synthetic/manipulated)",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "evidence": {
+          "default": "",
+          "title": "Evidence",
+          "type": "string"
+        },
+        "features": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Features",
+          "type": "object"
+        },
+        "is_fallback": {
+          "default": false,
+          "title": "Is Fallback",
+          "type": "boolean"
+        },
+        "fallback_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fallback Reason"
+        }
+      },
+      "required": [
+        "modality"
+      ],
+      "title": "ModalityEvidence",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "bundle_id": {
+      "title": "Bundle Id",
+      "type": "string"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "probabilities": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Probabilities",
+      "type": "object"
+    },
+    "abstained": {
+      "default": false,
+      "title": "Abstained",
+      "type": "boolean"
+    },
+    "abstain_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Abstain Reason"
     },
     "ranked_evidence": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "required": [
-          "rank",
-          "category",
-          "description"
-        ],
-        "properties": {
-          "rank": { "type": "integer" },
-          "category": { "type": "string" },
-          "modality": { "type": ["string", "null"] },
-          "description": { "type": "string" },
-          "importance": { "type": "number" },
-          "is_fallback": { "type": "boolean" }
+        "$ref": "#/$defs/EvidenceItem"
+      },
+      "title": "Ranked Evidence",
+      "type": "array"
+    },
+    "report": {
+      "default": "",
+      "title": "Report",
+      "type": "string"
+    },
+    "report_verified": {
+      "default": true,
+      "title": "Report Verified",
+      "type": "boolean"
+    },
+    "is_fallback": {
+      "default": false,
+      "title": "Is Fallback",
+      "type": "boolean"
+    },
+    "modality_results": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ModalityEvidence"
+      },
+      "title": "Modality Results",
+      "type": "object"
+    },
+    "cross_modal_results": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CrossModalEvidence"
+        },
+        {
+          "type": "null"
         }
-      }
+      ],
+      "default": null
+    },
+    "counterfactuals": {
+      "items": {
+        "$ref": "#/$defs/Counterfactual"
+      },
+      "title": "Counterfactuals",
+      "type": "array"
+    },
+    "next_steps": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Next Steps",
+      "type": "array"
+    },
+    "evidence_graph": {
+      "additionalProperties": true,
+      "title": "Evidence Graph",
+      "type": "object"
+    },
+    "conformal_set": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Conformal Set",
+      "type": "array"
+    },
+    "model_info": {
+      "additionalProperties": true,
+      "title": "Model Info",
+      "type": "object"
     }
-  }
+  },
+  "required": [
+    "bundle_id",
+    "label",
+    "confidence"
+  ],
+  "title": "TrustLayer Bundle Analysis Result",
+  "type": "object",
+  "description": "Schema for multimodal bundle verification, calibrated probabilities, and evidence ranking"
 }
